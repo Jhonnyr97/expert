@@ -1954,8 +1954,8 @@ function text_to_html($text, $smileyignored = null, $para = true, $newlines = tr
     $text = preg_replace("~>([[:space:]]+)<~i", "><", $text);
 
     // Remove any returns that precede or follow HTML tags.
-    $text = preg_replace("~([\n\r])<~i", " <", $text);
-    $text = preg_replace("~>([\n\r])~i", "> ", $text);
+    // $text = preg_replace("~([\n\r])<~i", " <", $text);
+    // $text = preg_replace("~>([\n\r])~i", "> ", $text);
 
     // Make returns into HTML newlines.
     if ($newlines) {

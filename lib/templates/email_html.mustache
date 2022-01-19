@@ -43,17 +43,8 @@
     }
 }}
 
+
 <style>
-    *{
-        margin: 0;
-    }
-    .container{
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-    }
     .header, .footer{
         background-color: #DA6624;
         width: 100%;
@@ -62,20 +53,7 @@
         display: flex;
         justify-content: center;
     }
-    .content{
-        padding: 100px;
-        line-height: 1.6;
-        font-family: sans-serif;
-        width: 100%;
-        max-width: 700px;
-        display: flex;
-        flex-direction: column;
-    }
-.content_int{
-        line-height: 1.6;
-        font-family: sans-serif;
-        width: 100%;
-        max-width: 700px;
+    .content_int{
         text-align: center;
     }
     .footer{
@@ -87,17 +65,18 @@
         justify-content: center;
         align-items: center;
     }
+    .center{
+        text-align:center;
+        margin:30px;
+    }
 </style>
-<div class="container">
-    <div class="header">
-        <img src="https://youniversity2.expert-italia.it/lib/templates/header-7001.png" alt="Expert">
-    </div>
-
-    <div class="content"> 
-        <div  class="content_int">    
-            {{ body }}
-        </div>      
-    </div>
-    <div class="footer"> <a href="https://youniversity2.expert-italia.it//"> https:/youniversity2.expert-italia.it/ </a> </div>
-
+<div class="header">
+    <img src="https://youniversity2.expert-italia.it/lib/templates/header-7001.png" alt="Expert">
 </div>
+<div class="center">
+{{{body}}}
+</div>
+<div class="footer"> 
+<a href="https://youniversity2.expert-italia.it//"> https:/youniversity2.expert-italia.it/ </a> 
+</div>
+
