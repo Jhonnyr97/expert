@@ -1,0 +1,123 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template core/email_html
+
+    Template for all html emails. Note that it may wrap content formatted
+    elsewhere in another a module template.
+
+    Context variables required for this template:
+    * sitefullname
+    * siteshortname
+    * sitewwwroot
+    * subject
+    * to
+    * toname
+    * touserid
+    * tousername
+    * from
+    * fromname
+    * replyto
+    * replytoname
+    * body
+    * prefix
+
+    Example context (json):
+    {
+        "prefix": "[Prefix Text]",
+        "body": "Email body"
+    }
+}}
+
+{{! {body} }}
+
+<style>
+
+    *{
+        margin: 0;
+    }
+    
+    .container{
+        max-width: 768px;
+        width: 100%;
+    }
+
+    .header, .footer{
+        background-color: #DA6624;
+    }
+
+    .header{
+
+    }
+
+    .content{
+        
+        padding: 50px 150px;
+        line-height: 1.6;
+        font-family: sans-serif;
+
+    }
+
+    .footer{
+
+        height: 75px;
+        color: white;
+        text-align: center;
+        font-family:Arial, Helvetica, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+    }
+
+</style>
+
+<div class="container">
+
+    <div class="header">
+        <img src="header.png" alt="Euronics">
+    </div>
+
+    <div class="content">
+
+        Ciao ragazzi!
+
+        <p>
+            Tutti i video dei partecipanti alla <b>XIAOMI Challenge</b> sono online!
+            Collegati alla YOUniversity per goderti a pieno questa esperienza.
+            <a href="https://youniversity2.expert-italia.it/course/view.php?id=74">https://youniversity2.expert-italia.it/course/view.php?id=74</a><br>
+            In evidenza troverete i video dei tre nuovi <b>Brand Ambassador di XIAOMI</b> , che verranno veicolati su tutti i canali Digital e Social di Expert.
+            E non è finita qui!
+            Anche XIAOMI ha deciso di rimanere in prima linea pubblicando i video dei vincitori sul canale Expert di Mi Academy.
+        </p>
+        <br>
+        <p>
+            Grazie ancora per la partecipazione e…alla prossima Challenge!
+            A nome di tutto il team, vi ringraziamo per quanto fatto durante l’anno e vi auguriamo un <b>Buon Natale ed un Felice Anno Nuovo.</b>    
+        </p>
+        <br>
+        <p>
+            Con affetto,
+            <br>
+            YOUniversity Team
+        </p>
+
+    </div>
+
+    <div class="footer">https://youniversity2.expert-italia.it//</div>
+
+</div>
