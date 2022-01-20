@@ -19,8 +19,8 @@ class block_cocoon_gallery_updated extends block_base
 
 ////////start code
 
-// /COMIENZO COMENTARIO CODIGO DE MAURO/
-public function get_content(){ // renderizar la info
+
+public function get_content(){ // render
   // require_once($CFG->libdir . '/filelib.php');
   if (!isset($_GET["id"])) {
     return $this->content;
@@ -159,23 +159,7 @@ public function get_content(){ // renderizar la info
               }
             }
 
-            function guardarCambios (context_id) {
-              let datos = $("#view-render_"+context_id).serialize();
-              let boton = $("#btn-guardar_"+context_id);
-              boton.prop("disabled",true);
-              $.ajax({
-                type:"POST",
-                url:"/course/viewupdated.php",
-                data: datos,
-                success: function (response) {
-                  console.log(response);
-                }
-              });
-              boton.prop("disabled",false);
-            
-            }
-
-
+          
 
             $("#myDropzone_'.$this->context->id.'").dropzone({            
               paramName: "repo_upload_file", // The name that will be used to transfer the file
