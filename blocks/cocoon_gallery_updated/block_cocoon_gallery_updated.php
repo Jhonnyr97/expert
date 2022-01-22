@@ -56,99 +56,44 @@ public function get_content(){ // renderizar la info
     $columns = 'col-sm-12 col-md-12 col-lg-4 ccn_gallery_col_medium';
   }
 
-  $fs = get_file_storage();
-  $files = $fs->get_area_files($this->context->id, 'block_cocoon_gallery_updated', 'content');
-  $this->content->image = '';
-  if (!is_null($this->config)) {
-    foreach ($files as $file) {
-        $filename = $file->get_filename();
-        if ($filename <> '.') {
-            $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(), null, $file->get_filepath(), $filename);
-            $this->content->image .= '
-            <div class="'.$columns.'">
-               <div class="gallery_item">
-               <img class="img-fluid img-circle-rounded w100" src="' . $url . '" alt="' . $filename . '">
-                <div class="gallery_overlay">
-                  
-                 <a class="ccn-icon popup-img" href="' . $url . '"><span class="flaticon-zoom-in"></span></a>
-                </div>
-              </div>
-            </div>';
-        }
-    }
-  } else {
-     for ($i=0; $i < 3; $i++) { 
-       $this->content->image .= '
-         <div class="'.$columns.'">
-           <div class="gallery_item">
-             <img class="img-fluid img-circle-rounded w100" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3bBWxJLrkz7GyJn-X-5iM03kIcKTezER2tA&usqp=CAU" alt="Img '. $i.'">
-               <div class="gallery_overlay">
-                 <a class="ccn-icon popup-img" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3bBWxJLrkz7GyJn-X-5iM03kIcKTezER2tA&usqp=CAU"><span class="flaticon-zoom-in"></span></a>
-               </div>
-             </div>
-           </div>';
-     }
-  } 
-  
-  $this->content->text = '
-    <section class="about-section pb0">
-      <div class="container">';
-      if($this->content->title || $this->content->subtitle){
-        $this->content->text .='
-        <div class="row">
-            <div class="col-lg-12 ">
-            <form name="" action="/course/view.php" method="POST" 
-            class="modal-content view_render_updated" id="view-render_'.$this->context->id.'">
-            <div class="modal-header">
-              <h5 class="modal-title">Edit [Cocoon] Gallery</h5>
-            </div>
-            <div class="modal-body">
-              <div class="form-group row">
-                <label for="id_config_title" class="col-sm-5 col-form-label text-right">Title: </label>
-                <div class="col-sm-5">
-                  <input type="text" class="form-control" id="id_config_title" name="config_title" value="'.$this->content->title.'">
-                </div>
-              </div>
-              <div class="form-group row">
-                <label for="sub_title" class="col-sm-5 col-form-label text-right">Subtitle: </label>
-                <div class="col-sm-5">
-                  <input type="text" class="form-control" name="config_subtitle" id="sub_title" value="'.$this->content->subtitle.'">
-                  <input type="hidden" name="itemid" id="itemid_'.$this->context->id.'" value="'.$this->context->id.'">
-                </div>
-              </div>
-              <div style="display:none;">
-                <input type="hidden" name="id" value="'.$_GET["id"].'">
-                <input type="hidden" name="bui_editid" value="'.$this->context->instanceid.'">
-                <input name="sesskey" type="hidden" value="'.sesskey().'">
-                <input name="_qf__block_cocoon_gallery_updated_edit_form" type="hidden" value="1">
-                <input name="mform_isexpanded_id_config_header" type="hidden" value="1">
-                <input name="mform_isexpanded_id_config_cocoon_block_settings" type="hidden" value="0">
-                <input name="mform_isexpanded_id_whereheader" type="hidden" value="0">
-                <input name="mform_isexpanded_id_onthispage" type="hidden" value="0">
-                <input name="bui_weight" type="hidden" value="5">
-                <input name="bui_region" type="hidden" value="below-content">
-                <input name="bui_visible" type="hidden" value="1">
-                <input name="bui_defaultweight" type="hidden" value="3">
-                <input name="bui_defaultregion" type="hidden" value="side-pre">
-                <input name="bui_pagetypepattern" type="hidden" value="course-view-*">
-                <input name="config_image" type="hidden" value="'.$this->context->id.'">
-              </div>
-              <div id="myDropzone_'.$this->context->id.'" class="dropzone">
-                <div class="dz-message needsclick">
-                  <div class="subtitle">To upload files, drag and drop them here.</div>
-                  <h3 class="dropzone-custom-title">
-                    <div class="dndupload-arrow-2"></div>  
-                  </h3>
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="submit" class="btn btn-primary">Save changes</button>
-            </div>
-          </form>
-            </div>
+  $this->content->image = '
+       <div class="col-sm-12 col-md-12 col-lg-4 ccn_gallery_col_medium">
+          <div class="gallery_item" id="galery">
+              
           </div>
-          <script>
+        </div>';
+
+  $after_img = "<div class='gallery_overlay'><a class='ccn-icon popup-img' href='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3bBWxJLrkz7GyJn-X-5iM03kIcKTezER2tA&usqp=CAU'><span class='flaticon-zoom-in'></span></div>";
+
+  $javascript = '
+        <script>
+          getImg()
+          function getImg(){
+              $.ajax({
+                url: "/plugin_gallery/?f=json_all",
+                method: "GET",
+                dataType: "json",
+                async: false,
+                crossDomain: "true",
+                success: function(data, status) {
+                    console.log("Status: "+status+"\nData: "+data["images"][0]["data"]);
+                    var img = $("<img />", { 
+                      id: data["images"][0]["id"],
+                      src: data["images"][0]["data"],
+                      class: "img-fluid img-circle-rounded w100"
+                    });
+                    img.appendTo($("#galery"));
+                    var img = $("<img />", { 
+                      id: data["images"][0]["id"],
+                      src: data["images"][0]["data"],
+                      class: "img-fluid img-circle-rounded w100"
+                    });
+                    $( "img" ).after("'.$after_img.'");
+                }
+              });
+          }
+
+
             function renderBlock() {
               let valor = $("input[name=\'edit\']").val();
               // console.log("valor", valor);
@@ -174,8 +119,6 @@ public function get_content(){ // renderizar la info
               boton.prop("disabled",false);
             
             }
-
-
 
             $("#myDropzone_'.$this->context->id.'").dropzone({            
               paramName: "repo_upload_file", // The name that will be used to transfer the file
@@ -250,32 +193,45 @@ public function get_content(){ // renderizar la info
               }
             });
             
-          renderBlock();
+          // renderBlock();
           // console.log("Iniciando...");
         
-        </script>
-        <style>
-          .dndupload-arrow-2 {
-            background: url("/theme/image.php/edumy/theme/1638926165/fp/dnd_arrow") center no-repeat;
-            width: 10%;
-            height: 80px;
-            position: absolute;
-            left:45%;
-          }
-          .dropzone {
-            min-height: 190px;
-          }
-
-          
-          .ccn_gallery_col_medium {
-            -ms-flex: 0 0 33.33333333% !important;
-            flex: 0 0 33.33333333% !important;
-            max-width: 33.33333333% !important;
-          }
-        
-        </style>';
+        </script>';
+  $this->content->text = '
+    <section class="about-section pb0">
+      <div class="container">';
+      $this->content->text .='
+      <div class="row">
+      <div class="col-lg-12 ">
+        <form   onsubmit="return false">
+          <label for="avatar">Choose a profile picture:</label>
+          <input type="file" name="img[]" multiple
+                accept="image/png, image/jpeg" id="#files">
+          <button type="submit" onclick="send_img()">Submit</button>
+        </form>
+      </div>
+    </div>
+    <style>
+      .dndupload-arrow-2 {
+        background: url("/theme/image.php/edumy/theme/1638926165/fp/dnd_arrow") center no-repeat;
+        width: 10%;
+        height: 80px;
+        position: absolute;
+        left:45%;
       }
-      $this->content->text .='<section class="about-section pb10">
+      .dropzone {
+        min-height: 190px;
+      }
+
+      
+      .ccn_gallery_col_medium {
+        -ms-flex: 0 0 33.33333333% !important;
+        flex: 0 0 33.33333333% !important;
+        max-width: 33.33333333% !important;
+      }
+    
+    </style>
+      <section class="about-section pb10">
               <div class="container">
                 <div class="row">
                   <div class="col-lg-6 offset-lg-3">
@@ -291,7 +247,8 @@ public function get_content(){ // renderizar la info
               </div>
             </section>
         </div>
-      </section>';
+      </section>
+      '.$javascript;
       
   return $this->content;
 }
