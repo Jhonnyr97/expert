@@ -1,5 +1,8 @@
 <?php
 global $CFG;
+/*global $USER;
+require_once('/var/www/html/moodle/config.php' );*/
+
 require_once($CFG->dirroot. '/theme/edumy/ccn/block_handler/ccn_block_handler.php');
 class block_cocoon_gallery_updated extends block_base
 {
@@ -17,11 +20,34 @@ class block_cocoon_gallery_updated extends block_base
         include($CFG->dirroot . '/theme/edumy/ccn/block_handler/specialization.php');
     }
 
+
+//////
+/*
+return $DB->get_records_sql ( "SELECT ra.id, ra.userid, ra.contextid, ra.roleid, r.name, r.shortname
+FROM {role_assignments} ra
+JOIN {context} c ON ra.contextid = c.id
+JOIN {role} r ON ra.roleid = r.id
+WHERE ra.userid = ?
+ORDER BY contextlevel DESC, contextid ASC, r.sortorder ASC";
+$roleassignments = $DB->get_records_sql($sql, array($USER->id));
+
+$user_roles = array();
+foreach($roleassignments as $k => $v){
+$user_roles[$v->roleid] = $v->name;
+}
+
+*/
+
+
+
 ////////start code
 
-// /COMIENZO COMENTARIO CODIGO DE MAURO/
-public function get_content(){ // renderizar la info
+
+public function get_content(){ // render
   // require_once($CFG->libdir . '/filelib.php');
+  global $USER, $COURSE, $DB;
+
+  
   if (!isset($_GET["id"])) {
     return $this->content;
   }
@@ -39,36 +65,32 @@ public function get_content(){ // renderizar la info
   } else {
     $this->content->subtitle = 'Cum doctus civibus efficiantur in imperdiet deterruisset.';
   }
-
-  if(!empty($this->config->columns)){
-    if($this->config->columns == 4) { //6
-      $columns = 'col-sm-6 col-md-6 col-lg-2 ccn_gallery_col_6';
-    } elseif($this->config->columns == 3) { //4
-      $columns = 'col-sm-6 col-md-6 col-lg-3 ccn_gallery_col_4';
-    } elseif($this->config->columns == 2) { //3
-      $columns = 'col-sm-6 col-md-4 col-lg-4 ccn_gallery_col_3';
-    } elseif($this->config->columns == 1) { //2
-      $columns = 'col-sm-6 col-md-6 col-lg-6 ccn_gallery_col_2';
-    } else { //1
-      $columns = 'col-sm-12 col-md-12 col-lg-12';
-    }
-  } else {
-    $columns = 'col-sm-12 col-md-12 col-lg-4 ccn_gallery_col_medium';
+  $userid = $USER->id;
+  $context = context_course::instance($COURSE->id);
+  $roles = get_user_roles($context, $USER->id, true);
+  $role = key($roles);
+  $rolename = $roles[$role]->shortname;
+  // is admin 
+  $admins = get_admins();
+  $isadmin = false;
+  foreach($admins as $admin) {
+      if ($USER->id == $admin->id) {
+          $isadmin = true;
+          break;
+      }
   }
-
   $this->content->image = '
-       <div class="col-sm-12 col-md-12 col-lg-4 ccn_gallery_col_medium">
-          <div class="gallery_item" id="galery">
+       <div class="">
+          <div id="galery">
               
           </div>
         </div>';
-
-  $after_img = "<div class='gallery_overlay'><a class='ccn-icon popup-img' href='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3bBWxJLrkz7GyJn-X-5iM03kIcKTezER2tA&usqp=CAU'><span class='flaticon-zoom-in'></span></div>";
 
   $javascript = '
         <script>
           getImg()
           function getImg(){
+            $("#galery").empty();
               $.ajax({
                 url: "/plugin_gallery/?f=json_all",
                 method: "GET",
@@ -76,141 +98,113 @@ public function get_content(){ // renderizar la info
                 async: false,
                 crossDomain: "true",
                 success: function(data, status) {
-                    console.log("Status: "+status+"\nData: "+data["images"][0]["data"]);
-                    var img = $("<img />", { 
-                      id: data["images"][0]["id"],
-                      src: data["images"][0]["data"],
-                      class: "img-fluid img-circle-rounded w100"
-                    });
-                    img.appendTo($("#galery"));
-                    var img = $("<img />", { 
-                      id: data["images"][0]["id"],
-                      src: data["images"][0]["data"],
-                      class: "img-fluid img-circle-rounded w100"
-                    });
-                    $( "img" ).after("'.$after_img.'");
+                    console.log("Status: "+status);
+
+                    Array.from(data["images"]).forEach((img, index) => {
+
+                      let div_temp = $("<div />", {
+                        class: "gallery_item col-3 d-inline-block",
+                        id: img["id"]+"_div"
+                      })
+                      div_temp.appendTo($("#galery"));
+
+                      let img_temp = $("<img />", {
+                        id: img["id"],
+                        src: img["data"],
+                        class: "img-fluid img-circle-rounded w100"
+                      });
+                      img_temp.appendTo(div_temp);
+                      
+                      $("#"+img["id"]).after(`
+                      <div class="gallery_overlay"><a class="ccn-icon popup-img" href=${img["data"]} ><span class="flaticon-zoom-in"></span></div>
+                      `)
+                    })
+
                 }
               });
           }
 
-
-            function renderBlock() {
-              let valor = $("input[name=\'edit\']").val();
-              // console.log("valor", valor);
-              if (valor == "off") {
-                $(".view_render_updated").css("display","block");
-              } else {
-                $(".view_render_updated").css("display","none");
-              }
-            }
-
-            function guardarCambios (context_id) {
-              let datos = $("#view-render_"+context_id).serialize();
-              let boton = $("#btn-guardar_"+context_id);
-              boton.prop("disabled",true);
-              $.ajax({
-                type:"POST",
-                url:"/course/viewupdated.php",
-                data: datos,
-                success: function (response) {
-                  console.log(response);
-                }
-              });
-              boton.prop("disabled",false);
-            
-            }
-
-            $("#myDropzone_'.$this->context->id.'").dropzone({            
-              paramName: "repo_upload_file", // The name that will be used to transfer the file
-              maxFilesize: 5, // MB
-              maxFile: 12,
-              dictDefaultMessage:"",
-              dictRemoveFile: "Remove Image",
-              url: "/repository/repository_ajax.php?action=upload",
-              acceptedFiles: "image/*",
-              addRemoveLinks: true,
-              thumbnailWidth: 120,
-              init: function () {
-                let myDropzone = this;
-                $.ajax({
-                  type:"POST",
-                  url:"/repository/draftfiles_ajax.php?action=list",
-                  data: {
-                    "sesskey": M.cfg.sesskey,
-                    "filepath":  "/",
-                    "itemid":  $("#itemid_'.$this->context->id.'").val(),
-                  },
-                  success: function (response) {
-                    let arreglo = response.list
-                    for(let i=0; i<arreglo.length; i++) {
-                      let el = {name: arreglo[i].filename, url:arreglo[i].url, size: arreglo[i].size};
-                      myDropzone.emit("addedfile", el);
-                      myDropzone.emit("thumbnail", el, el.url);
-
-                      el.previewElement.classList.add("dz-success");
-                      el.previewElement.classList.add("dz-complete");
-                   
-                      myDropzone.files.push(el);
-                    }
-
-                  }
-                });
-               
-                this.on("sending", function(file, xhr, formData) {
-                  formData.append("sesskey", M.cfg.sesskey);
-                  formData.append("savepath", "/");
-                  formData.append("author", "Admin YOUniversity");
-                  formData.append("accepted_types", "[.png, .jpg, .gif]");
-                  formData.append("title",file.name);
-                  formData.append("repo_id","5");
-                  formData.append("itemid", $("#itemid_'.$this->context->id.'").val());
-               
-                });
-                this.on("addedfile", function(file) {
-                });
-
-                this.on("removedfile", function (file) {
-                  let myDropzone = this;
-                  let datos = {
-                    "sesskey": M.cfg.sesskey,
-                    "filepath":  "/",
-                    "filename": file.name,
-                    "itemid":  $("#itemid_'.$this->context->id.'").val(),
-                  }
-                
-                  $.ajax({
-                    type:"POST",
-                    url:"/repository/draftfiles_ajax.php?action=delete",
-                    data: datos,
-                    success: function (response) {
-                      if (response != false) {
-                        
-                      }
-                    }
-                  });
-                });
-
-              }
+          function getBase64(file) {
+            return new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.readAsDataURL(file);
+              reader.onload = () => resolve(reader.result);
+              reader.onerror = error => reject(error);
             });
+          }
+
+
+
+           function send_backend(files) {
+            return new Promise((resolve, reject) => {
+              Array.from(files).forEach((file, index) => {  
+                getBase64(file).then(
+                  data => {
+                    object = [{
+                      data: data,
+                      id: (new Date()).getTime(),
+                      courseid: '.$_GET["id"].',
+                      userid: '.$userid.'
+                    }]
+                    $.ajax({
+                      type: "POST",
+                      url: "/plugin_gallery/",
+                      data:  JSON.stringify(object),
+                      contentType: "application/json;",
+                      async: false,
+                      success: function (data) {
+                        console.log(data)
+                        if (index === Array.from(files).length - 1){ 
+                          resolve("ok")
+                        }
+                      }
+                    })
+
+                  }
+                );
+              })
+            })
             
-          // renderBlock();
-          // console.log("Iniciando...");
+          }
+          
+    
+    
+        function send_img(){
+            var files = document.querySelector(`input[type="file"]`).files
+            send_backend(files).then(data => {
+              getImg()
+              alert("success")
+            })
+        }
+
+
+        $( "#submit" ).click(function() {
+          send_img()
+        });
+
         
         </script>';
+    if ($rolename == 'manager' || $isadmin == true) {
+      $form = '<div class="col-lg-12 ">
+      <div>
+        <label for="avatar">Choose a profile picture:</label>
+        <input type="file" name="img[]" multiple
+              accept="image/png, image/jpeg" id="#files">
+        <button id="submit" >Submit</button>
+      </div>
+    </div>';
+    }else {
+      $form = '';
+    }
+
+
   $this->content->text = '
     <section class="about-section pb0">
       <div class="container">';
       $this->content->text .='
       <div class="row">
-      <div class="col-lg-12 ">
-        <form   onsubmit="return false">
-          <label for="avatar">Choose a profile picture:</label>
-          <input type="file" name="img[]" multiple
-                accept="image/png, image/jpeg" id="#files">
-          <button type="submit" onclick="send_img()">Submit</button>
-        </form>
+      '.$form.'
       </div>
-    </div>
     <style>
       .dndupload-arrow-2 {
         background: url("/theme/image.php/edumy/theme/1638926165/fp/dnd_arrow") center no-repeat;
