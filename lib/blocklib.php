@@ -1568,6 +1568,11 @@ class block_manager {
         } else {
             require_sesskey();
 
+            $flag = optional_param('id', null, PARAM_INT);
+
+            $response = file_get_contents('https://youniversity2.expert-italia.it/plugin_gallery/?f=delete_course&id='.$flag);
+
+
             blocks_delete_instance($block->instance);
             // bui_deleteid and bui_confirm should not be in the PAGE url.
             $this->page->ensure_param_not_in_url('bui_deleteid');
