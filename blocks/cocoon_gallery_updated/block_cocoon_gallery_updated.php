@@ -92,15 +92,14 @@ public function get_content(){ // render
           function getImg(){
             $("#galery").empty();
               $.ajax({
-                url: "/plugin_gallery/?f=json_all",
+                url: "/plugin_gallery/?f=get_course&id='.$COURSE->id.'",
                 method: "GET",
                 dataType: "json",
                 async: false,
                 crossDomain: "true",
                 success: function(data, status) {
-                    console.log("Status: "+status);
 
-                    Array.from(data["images"]).forEach((img, index) => {
+                    Array.from(data).forEach((img, index) => {
 
                       let div_temp = $("<div />", {
                         class: "gallery_item col-3 d-inline-block",
@@ -116,7 +115,7 @@ public function get_content(){ // render
                       img_temp.appendTo(div_temp);
                       
                       $("#"+img["id"]).after(`
-                      <div class="gallery_overlay"><a class="ccn-icon popup-img" href=${img["data"]} ><span class="flaticon-zoom-in"></span></div>
+                      <div class="gallery_overlay"><a class="ccn-icon popup-img" href=${img["data"]} ><span class="flaticon-zoom-in"></span></div></a>
                       `)
                     })
 
@@ -172,27 +171,74 @@ public function get_content(){ // render
         function send_img(){
             var files = document.querySelector(`input[type="file"]`).files
             send_backend(files).then(data => {
-              getImg()
-              alert("success")
+              location.reload();
             })
         }
 
 
         $( "#submit" ).click(function() {
+          $("#submit").hide();
+          $("#spinner").show();
           send_img()
         });
 
         
         </script>';
     if ($rolename == 'manager' || $isadmin == true) {
-      $form = '<div class="col-lg-12 ">
-      <div>
-        <label for="avatar">Choose a profile picture:</label>
-        <input type="file" name="img[]" multiple
-              accept="image/png, image/jpeg" id="#files">
-        <button id="submit" >Submit</button>
+      $form = '
+      <div class="col-lg-12 ">
+        <div>
+          <label for="avatar">Choose a profile picture:</label>
+          <input type="file" name="img[]" multiple
+                accept="image/png, image/jpeg" id="#files">
+          <button id="submit" >Submit</button>
+          <div id="spinner" class="spinner-border" role="status" style="display:none;">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
+        <div id="delete" class="m-3 pt-6">
+        
+        </div>
       </div>
-    </div>';
+
+      <script>
+        get_by_user()
+
+        function delete_img(id) {
+          $.ajax({
+            url: "/plugin_gallery/?f=delete_img&id="+id,
+            method: "GET",
+            dataType: "json",
+            success: function(data, status) {
+              location.reload();
+            }
+          })
+        }
+
+        function get_by_user(){
+          $.ajax({
+            url: "/plugin_gallery/?f=get_course_by_user&id='.$userid.'&courseid='.$COURSE->id.'",
+            method: "GET",
+            dataType: "json",
+            success: function(data, status) {
+              Array.from(data).forEach((img, index) => {
+
+                let img_temp = $("<img />", {
+                  id: img["id"]+"_delete",
+                  src: img["data"],
+                  class: "col-2"
+                });
+                img_temp.appendTo($("#delete"));
+
+                let a = $(`<a href="#delete"  onclick="delete_img(${img["id"]})" > Delete </a>`)
+                img_temp.after(a)
+              })
+            }
+          })
+        }
+      </script>
+    
+    ';
     }else {
       $form = '';
     }
