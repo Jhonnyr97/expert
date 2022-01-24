@@ -80,7 +80,7 @@ public function get_content(){ // render
                       userid = master_array[index]["userid"]
                       imgs_user[userid] = master_array.filter(elem => elem["userid"] === userid)
                     })
-                    Object.keys(imgs_user).forEach(key => {
+                    Object.keys(imgs_user).reverse().forEach(key => {
                       imgs_user[key].forEach((img, index) => {
                         if (index === 0){
                           //get title fon input
