@@ -2,12 +2,12 @@
 
 // get all img
 
-if(function_exists($_GET['f'])) {
-    $_GET['f']();
- }
+    if(function_exists($_GET['f'])) {
+        $_GET['f']();
+    }
     function delete_course(){
         $course = $_GET['id'];
-        $data = find_file("*", $course);
+        $data = find_data_or_create("*", $course);
         $path = "*_{$course}.json";
 
         foreach ($data as $elem){
@@ -23,8 +23,8 @@ if(function_exists($_GET['f'])) {
 
     }
 
-    function find_file($user = '*', $course, $get_name = false){
-        if ($get_name == false){
+    function find_data_or_create($user = '*', $course, $filter_id = false){
+        if ($filter_id == false){
             $path = "{$user}_{$course}.json";
             $bigdata = [];
             foreach (glob($path) as $filename) {
@@ -41,8 +41,8 @@ if(function_exists($_GET['f'])) {
                 $data = file_get_contents($filename);
                 $elem = json_decode($data, true);
 
-                $resources = array_filter($elem, function ($var) use ($get_name) {
-                    return ($var['id'] != $get_name);
+                $resources = array_filter($elem, function ($var) use ($filter_id) {
+                    return ($var['id'] != $filter_id);
                 });
                 $resources = array_values($resources);
                 file_put_contents($filename, json_encode($resources));
@@ -57,7 +57,7 @@ if(function_exists($_GET['f'])) {
         //$imgs = json_decode($data, true);
         $flag = $_GET['id'];
         $flag_course = $_GET['courseid'];
-        $imgs = find_file($flag, $flag_course);
+        $imgs = find_data_or_create($flag, $flag_course);
 
         $resources = array_filter($imgs, function ($var) use ($flag, $flag_course) {
             return ($var['userid'] == $flag && $var['courseid'] == $flag_course );
@@ -71,7 +71,7 @@ if(function_exists($_GET['f'])) {
     function delete_img(){
         $flag = $_GET['id'];
 
-        $resources = find_file("*", "*", $flag);
+        $resources = find_data_or_create("*", "*", $flag);
 
         unlink("{$flag}.png");
 
@@ -83,7 +83,7 @@ if(function_exists($_GET['f'])) {
         //$data = file_get_contents("date.json");
         //$imgs = json_decode($data, true);
         $flag = $_GET['id'];
-        $imgs = find_file("*", $flag);
+        $imgs = find_data_or_create("*", $flag);
         $resources = array_filter($imgs, function ($var) use ($flag) {
             return ($var['courseid'] == $flag);
         });
@@ -132,6 +132,26 @@ if(function_exists($_GET['f'])) {
 
         return "https://youniversity2.expert-italia.it/plugin_gallery/{$fileName}";
     }
+
+    function change_title(){
+        $user = $_GET['userid'];
+        $course = $_GET['courseid'];
+        $title = $_GET['title'];
+
+        $imgs = find_data_or_create($user, $course);
+
+        foreach ($imgs as $key => $entry) {
+            $imgs[$key]["title"] = $title;
+        }
+        
+        $resources = array_values($imgs);
+
+        $path = "{$user}_{$course}.json";
+        file_put_contents($path, json_encode($resources));
+        header('Content-type: application/json');
+        echo json_encode($resources);
+    }
+
     // post new img
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -145,7 +165,7 @@ if(function_exists($_GET['f'])) {
         foreach($bodyJson as $elem){
             $elem["data"] = saveBase64ImagePng($elem["data"], $elem["id"]);
             //$elem["data"] = "data:image/jpeg;base64,".base64_encode($imagedata);
-            imagedestroy($img);
+            // imagedestroy($img);
             array_push($imgs, $elem);
         };
 

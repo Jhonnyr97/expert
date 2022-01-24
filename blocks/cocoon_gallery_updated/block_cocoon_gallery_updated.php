@@ -20,29 +20,6 @@ class block_cocoon_gallery_updated extends block_base
         include($CFG->dirroot . '/theme/edumy/ccn/block_handler/specialization.php');
     }
 
-
-//////
-/*
-return $DB->get_records_sql ( "SELECT ra.id, ra.userid, ra.contextid, ra.roleid, r.name, r.shortname
-FROM {role_assignments} ra
-JOIN {context} c ON ra.contextid = c.id
-JOIN {role} r ON ra.roleid = r.id
-WHERE ra.userid = ?
-ORDER BY contextlevel DESC, contextid ASC, r.sortorder ASC";
-$roleassignments = $DB->get_records_sql($sql, array($USER->id));
-
-$user_roles = array();
-foreach($roleassignments as $k => $v){
-$user_roles[$v->roleid] = $v->name;
-}
-
-*/
-
-
-
-////////start code
-
-
 public function get_content(){ // render
   // require_once($CFG->libdir . '/filelib.php');
   global $USER, $COURSE, $DB;
@@ -90,7 +67,6 @@ public function get_content(){ // render
         <script>
           getImg()
           function getImg(){
-            $("#galery").empty();
               $.ajax({
                 url: "/plugin_gallery/?f=get_course&id='.$COURSE->id.'",
                 method: "GET",
@@ -98,27 +74,38 @@ public function get_content(){ // render
                 async: false,
                 crossDomain: "true",
                 success: function(data, status) {
-
-                    Array.from(data).forEach((img, index) => {
-
-                      let div_temp = $("<div />", {
-                        class: "gallery_item col-3 d-inline-block",
-                        id: img["id"]+"_div"
-                      })
-                      div_temp.appendTo($("#galery"));
-
-                      let img_temp = $("<img />", {
-                        id: img["id"],
-                        src: img["data"],
-                        class: "img-fluid img-circle-rounded w100"
-                      });
-                      img_temp.appendTo(div_temp);
-                      
-                      $("#"+img["id"]).after(`
-                      <div class="gallery_overlay"><a class="ccn-icon popup-img" href=${img["data"]} ><span class="flaticon-zoom-in"></span></div></a>
-                      `)
+                    master_array = Array.from(data)
+                    imgs_user = {}
+                    master_array.forEach((elem, index) => {
+                      userid = master_array[index]["userid"]
+                      imgs_user[userid] = master_array.filter(elem => elem["userid"] === userid)
                     })
+                    Object.keys(imgs_user).forEach(key => {
+                      imgs_user[key].forEach((img, index) => {
+                        if (index === 0){
+                          //get title fon input
+                          let title = $(` <h2 class="m-3"> ${img["title"]} </h2> `)
+                          title.appendTo($("#galery"));
+                        }
 
+                        let div_temp = $("<div />", {
+                          class: "gallery_item col-3 d-inline-block",
+                          id: img["id"]+"_div"
+                        })
+                        div_temp.appendTo($("#galery"));
+
+                        let img_temp = $("<img />", {
+                          id: img["id"],
+                          src: img["data"],
+                          class: "img-fluid img-circle-rounded w100"
+                        });
+                        img_temp.appendTo(div_temp);
+                        
+                        $("#"+img["id"]).after(`
+                        <div class="gallery_overlay"><a class="ccn-icon popup-img" href=${img["data"]} ><span class="flaticon-zoom-in"></span></div></a>
+                        `)
+                      })
+                    })
                 }
               });
           }
@@ -134,7 +121,7 @@ public function get_content(){ // render
 
 
 
-           function send_backend(files) {
+          function send_backend(files) {
             return new Promise((resolve, reject) => {
               Array.from(files).forEach((file, index) => {  
                 getBase64(file).then(
@@ -143,7 +130,8 @@ public function get_content(){ // render
                       data: data,
                       id: (new Date()).getTime(),
                       courseid: '.$_GET["id"].',
-                      userid: '.$userid.'
+                      userid: '.$userid.',
+                      title: $("#title").val()
                     }]
                     $.ajax({
                       type: "POST",
@@ -152,7 +140,6 @@ public function get_content(){ // render
                       contentType: "application/json;",
                       async: false,
                       success: function (data) {
-                        console.log(data)
                         if (index === Array.from(files).length - 1){ 
                           resolve("ok")
                         }
@@ -165,33 +152,55 @@ public function get_content(){ // render
             })
             
           }
-          
-    
-    
-        function send_img(){
-            var files = document.querySelector(`input[type="file"]`).files
-            send_backend(files).then(data => {
-              location.reload();
-            })
-        }
+            
+      
+      
+          function send_img(){
+              var files = $(`input[type="file"]`).get(0).files
+              send_backend(files).then(data => {
+                location.reload();
+              })
+          }
 
 
-        $( "#submit" ).click(function() {
-          $("#submit").hide();
-          $("#spinner").show();
-          send_img()
-        });
+          $( "#submit" ).click(function(event) {
+            event.preventDefault();
+            $("#title").disabled = true;
+            $("#submit").hide();
+            $("#spinner").show();
+            if ($(`input[type="file"]`).get(0).files.length === 0) {
+              let get_title = $("#title").val()
+              $.ajax({
+                url: "/plugin_gallery/?f=change_title&userid='.$userid.'&courseid='.$COURSE->id.'&title="+get_title,
+                type: "GET",
+                success: function (data) {
+                  location.reload();
+                }
+              })
+            }
+            if ($(`input[type="file"]`).get(0).files.length !== 0) {
+              send_img()
+            }
+            
+          });
 
         
         </script>';
     if ($rolename == 'manager' || $isadmin == true) {
       $form = '
       <div class="col-lg-12 ">
-        <div>
-          <label for="avatar">Choose a profile picture:</label>
-          <input type="file" name="img[]" multiple
-                accept="image/png, image/jpeg" id="#files">
-          <button id="submit" >Submit</button>
+        <form>
+          <div class="form-group">
+            <label for="files">Title:</label>
+            <input type="text" class="form-control" name="title" id="title">
+          </div>
+          <div class="form-group">
+            <label for="files">Choose a profile picture:</label>
+            <input type="file" class="form-control-file" name="img[]" multiple
+                  accept="image/png, image/jpeg" id="#files">
+          </div>
+          <br>
+          <button class="btn btn-primary" id="submit" >Submit</button>
           <div id="spinner" class="spinner-border" role="status" style="display:none;">
             <span class="sr-only">Loading...</span>
           </div>
@@ -210,7 +219,11 @@ public function get_content(){ // render
             method: "GET",
             dataType: "json",
             success: function(data, status) {
-              location.reload();
+              // location.reload();
+              $("#"+id+"_div").remove();
+              $("#"+id+"_div_delete").remove();
+              //get_by_user()
+              //getImg()
             }
           })
         }
@@ -222,15 +235,22 @@ public function get_content(){ // render
             dataType: "json",
             success: function(data, status) {
               Array.from(data).forEach((img, index) => {
+                if (index == 0) {
+                  $("#title").val(img["title"])
+                }
+                let div_temp = $("<div />", {
+                  class: "gallery_item col-2 d-inline-block",
+                  id: img["id"]+"_div_delete"
+                })
+                div_temp.appendTo($("#delete"));
 
                 let img_temp = $("<img />", {
                   id: img["id"]+"_delete",
                   src: img["data"],
-                  class: "col-2"
+                  class: ""
                 });
-                img_temp.appendTo($("#delete"));
-
-                let a = $(`<a href="#delete"  onclick="delete_img(${img["id"]})" > Delete </a>`)
+                img_temp.appendTo(div_temp);
+                let a = $(`<a href="#title"  onclick="delete_img(${img["id"]})" > Delete </a>`)
                 img_temp.after(a)
               })
             }
