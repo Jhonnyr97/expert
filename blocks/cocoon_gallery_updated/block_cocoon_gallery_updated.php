@@ -84,7 +84,7 @@ public function get_content(){ // render
                       imgs_user[key].forEach((img, index) => {
                         if (index === 0){
                           //get title fon input
-                          let title = $(` <h2 class="m-3"> ${img["title"]} </h2> `)
+                          let title = $(` <h2 class="m-3"> ${Array.from(imgs_user[key]).at(-1)["title"]} </h2> `)
                           title.appendTo($("#galery"));
                         }
 
@@ -236,7 +236,7 @@ public function get_content(){ // render
             success: function(data, status) {
               Array.from(data).forEach((img, index) => {
                 if (index == 0) {
-                  $("#title").val(img["title"])
+                  $("#title").val( Array.from(data).at(-1)["title"])
                 }
                 let div_temp = $("<div />", {
                   class: "gallery_item col-2 d-inline-block",
