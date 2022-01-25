@@ -84,17 +84,17 @@ public function get_content(){ // render
                       imgs_user[key].forEach((img, index) => {
                         if (index === 0){
                           //get title fon input
-                          let title = $(` <h2 class="m-3"> ${Array.from(imgs_user[key]).at(-1)["title"]} </h2> `)
+                          var title = $(` <h2 class="m-3"> ${Array.from(imgs_user[key]).pop()["title"]} </h2> `)
                           title.appendTo($("#galery"));
                         }
 
-                        let div_temp = $("<div />", {
+                        var div_temp = $("<div />", {
                           class: "gallery_item col-3 d-inline-block",
                           id: img["id"]+"_div"
                         })
                         div_temp.appendTo($("#galery"));
 
-                        let img_temp = $("<img />", {
+                        var img_temp = $("<img />", {
                           id: img["id"],
                           src: img["data"],
                           class: "img-fluid img-circle-rounded w100"
@@ -169,7 +169,7 @@ public function get_content(){ // render
             $("#submit").hide();
             $("#spinner").show();
             if ($(`input[type="file"]`).get(0).files.length === 0) {
-              let get_title = $("#title").val()
+              var get_title = $("#title").val()
               $.ajax({
                 url: "/plugin_gallery/?f=change_title&userid='.$userid.'&courseid='.$COURSE->id.'&title="+get_title,
                 type: "GET",
@@ -191,20 +191,19 @@ public function get_content(){ // render
       <div class="col-lg-12 ">
         <form>
           <div class="form-group">
-            <label for="files">Title:</label>
+            <label for="files">Titolo:</label>
             <input type="text" class="form-control" name="title" id="title">
           </div>
           <div class="form-group">
-            <label for="files">Choose a profile picture:</label>
             <input type="file" class="form-control-file" name="img[]" multiple
                   accept="image/png, image/jpeg" id="#files">
           </div>
           <br>
-          <button class="btn btn-primary" id="submit" >Submit</button>
+          <button class="btn btn-primary" id="submit" >Salva</button>
           <div id="spinner" class="spinner-border" role="status" style="display:none;">
             <span class="sr-only">Loading...</span>
           </div>
-        </div>
+        </form>
         <div id="delete" class="m-3 pt-6">
         
         </div>
@@ -236,21 +235,21 @@ public function get_content(){ // render
             success: function(data, status) {
               Array.from(data).forEach((img, index) => {
                 if (index == 0) {
-                  $("#title").val( Array.from(data).at(-1)["title"])
+                  $("#title").val( Array.from(data).pop()["title"])
                 }
-                let div_temp = $("<div />", {
+                var div_temp = $("<div />", {
                   class: "gallery_item col-2 d-inline-block",
                   id: img["id"]+"_div_delete"
                 })
                 div_temp.appendTo($("#delete"));
 
-                let img_temp = $("<img />", {
+                var img_temp = $("<img />", {
                   id: img["id"]+"_delete",
                   src: img["data"],
                   class: ""
                 });
                 img_temp.appendTo(div_temp);
-                let a = $(`<a href="#title"  onclick="delete_img(${img["id"]})" > Delete </a>`)
+                var a = $(`<a href="#title"  onclick="delete_img(${img["id"]})" > Delete </a>`)
                 img_temp.after(a)
               })
             }
