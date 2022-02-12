@@ -119,8 +119,6 @@ public function get_content(){ // render
             });
           }
 
-
-
           function send_backend(files) {
             return new Promise((resolve, reject) => {
               Array.from(files).forEach((file, index) => {  
@@ -152,8 +150,6 @@ public function get_content(){ // render
             })
             
           }
-            
-      
       
           function send_img(){
               var files = $(`input[type="file"]`).get(0).files
@@ -161,7 +157,6 @@ public function get_content(){ // render
                 location.reload();
               })
           }
-
 
           $( "#submit" ).click(function(event) {
             event.preventDefault();
@@ -182,9 +177,7 @@ public function get_content(){ // render
               send_img()
             }
             
-          });
-
-        
+          });        
         </script>';
     if ($rolename == 'manager' || $isadmin == true) {
       $form = '

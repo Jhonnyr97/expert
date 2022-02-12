@@ -141,6 +141,8 @@ class report_sql extends report_base {
                         if (!$this->isForExport()) {
                             $cell = format_text($cell, FORMAT_HTML, array('trusted' => true, 'noclean' => true, 'para' => false));
                         }
+                        $cell = str_replace('%5B', '[', $cell); // NSO jjw - added
+                        $cell = str_replace('%5D', ']', $cell); // NSO jjw - added
                         $arrayrow[$ii] = str_replace('[[QUESTIONMARK]]', '?', $cell);
                     }
                     $totalrecords++;
